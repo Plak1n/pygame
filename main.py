@@ -2,8 +2,9 @@ import os
 import time
 import pygame
 
-from const import BG_SPEED, PLAYER_SPEED, PLAYER_CROUCH_SPEED, PLAYER_HEIGHT_CROUCHING, PLAYER_HEIGHT_STANDING
+from const import BG_SPEED, PLAYER_SPEED, PLAYER_CROUCH_SPEED, PLAYER_HEIGHT_CROUCHING, PLAYER_HEIGHT_STANDING, GHOST_SPEED
 
+clock = pygame.time.Clock()
 
 pygame.init()
 screen = pygame.display.set_mode((1366,768))
@@ -12,7 +13,7 @@ icon = pygame.image.load("img\\chess_icon.png")
 pygame.display.set_icon(icon)
 
 background = pygame.image.load("img/background.png")
-background = pygame.transform.scale(background,(1366,768))
+background = pygame.transform.scale(background,(1366,768)).convert_alpha()
 
 l1 = pygame.image.load("img/player_left1.png")
 l2 = pygame.image.load("img/player_left2.png")
@@ -30,8 +31,13 @@ walk_right = [r1, r2, r3, r4]
 
 
 for i in range(len(walk_left)):
-    walk_left[i] = pygame.transform.scale(walk_left[i],(100,100))
-    walk_right[i] = pygame.transform.scale(walk_right[i],(100,100))
+    walk_left[i] = pygame.transform.scale(walk_left[i],(100,100)).convert_alpha()
+    walk_right[i] = pygame.transform.scale(walk_right[i],(100,100)).convert_alpha()
+
+ghost = pygame.image.load("img/ghost.png")
+ghost = pygame.transform.scale(ghost,(70,70)).convert_alpha()
+ghost_x = 1370
+ghost_list_in_game = []
 
 loops = 0
 player_anim_count = 0
@@ -41,11 +47,14 @@ bg_x1 = 1366
 player_x = 150
 player_y = 550
 is_jumped = False
-jump_high = 15
+jump_high = 11
 
 # Sound
 # bg_sound = pygame.mixer.Sound("path to sound")
 # bg_sound.play(-1)
+
+ghost_timer = pygame.USEREVENT + 1
+pygame.time.set_timer(ghost_timer,5000,-1)
 
 running = True
 while running:
@@ -53,7 +62,18 @@ while running:
     
     screen.blit(background, (bg_x,0))
     screen.blit(background, (bg_x1,0))
+    screen.blit(ghost,(ghost_x,550))
     
+    player_rect = walk_left[player_anim_count].get_rect(topleft=(player_x, player_y))
+    
+    if ghost_list_in_game:
+        for el in ghost_list_in_game:
+            screen.blit(ghost, el)
+            el.x -=GHOST_SPEED
+            if player_rect.colliderect(el):
+                print("You lose")
+    
+   
     
     keys = pygame.key.get_pressed()
     
@@ -79,21 +99,21 @@ while running:
         if keys[pygame.K_SPACE] or keys[pygame.K_w]:
             is_jumped = True
     else:
-        if jump_high >= -15:
+        if jump_high >= -11:
             if jump_high > 0:
-                player_y -=(jump_high ** 2)/3
+                player_y -=(jump_high ** 2)/2
             else:
-                player_y += (jump_high **2 )/3
-            jump_high -=1.5
+                player_y += (jump_high **2 )/2
+            jump_high -=1
         else:
             is_jumped = False
-            jump_high = 15
+            jump_high = 11
         
     
     
     if player_anim_count == 3:
         player_anim_count = 0 
-    elif loops%7 ==0:
+    elif loops%8 ==0:
         player_anim_count +=1
     
     bg_x -= BG_SPEED
@@ -104,6 +124,8 @@ while running:
     if bg_x1 <= 0:
         bg_x1 = 1366
     
+    ghost_x -=GHOST_SPEED
+    
     pygame.display.update()
     
     for event in pygame.event.get():
@@ -113,10 +135,10 @@ while running:
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_s:
                 player_y -= PLAYER_HEIGHT_STANDING - PLAYER_HEIGHT_CROUCHING
+        if event.type == ghost_timer:
+            ghost_list_in_game.append(ghost.get_rect(topleft=(1370, 550)))
         if event.type == pygame.QUIT:
             running = False
             pygame.quit()
 
-    
-if __name__ == "__main__":
-    pass
+    clock.tick(45)
