@@ -2,7 +2,7 @@ import os
 import time
 import pygame
 
-from const import BG_SPEED, PLAYER_SPEED
+from const import BG_SPEED, PLAYER_SPEED, PLAYER_CROUCH_SPEED, PLAYER_HEIGHT_CROUCHING, PLAYER_HEIGHT_STANDING
 
 
 pygame.init()
@@ -58,14 +58,22 @@ while running:
     keys = pygame.key.get_pressed()
     
     if keys[pygame.K_a]:
-        screen.blit(walk_left[player_anim_count],(player_x,player_y))
+        if keys[pygame.K_s]:
+            screen.blit(walk_left[player_anim_count], (player_x, player_y + PLAYER_HEIGHT_STANDING - PLAYER_HEIGHT_CROUCHING))
+        else:
+            screen.blit(walk_left[player_anim_count],(player_x,player_y))
     else: 
-        screen.blit(walk_right[player_anim_count],(player_x, player_y))
+        if keys[pygame.K_s]:
+            screen.blit(walk_right[player_anim_count], (player_x, player_y + PLAYER_HEIGHT_STANDING - PLAYER_HEIGHT_CROUCHING))
+        else:
+            screen.blit(walk_right[player_anim_count],(player_x, player_y))
+
     
-    if keys[pygame.K_d] and player_x <=1250:
+    if keys[pygame.K_d] and player_x <=1250 and not keys[pygame.K_s]:
         player_x += PLAYER_SPEED
-    elif keys[pygame.K_a] and player_x >= 20:
+    elif keys[pygame.K_a] and player_x >= 20 and not keys[pygame.K_s]:
         player_x -= PLAYER_SPEED
+
     
     if not is_jumped:
         if keys[pygame.K_SPACE] or keys[pygame.K_w]:
@@ -99,6 +107,12 @@ while running:
     pygame.display.update()
     
     for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_s:
+                player_y += PLAYER_HEIGHT_STANDING - PLAYER_HEIGHT_CROUCHING
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_s:
+                player_y -= PLAYER_HEIGHT_STANDING - PLAYER_HEIGHT_CROUCHING
         if event.type == pygame.QUIT:
             running = False
             pygame.quit()
