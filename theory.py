@@ -14,6 +14,11 @@ square.fill("black")
 red_hat_font = pygame.font.Font("fonts\\RedHatMono-VariableFont_wght.ttf", 30)
 text_surface = red_hat_font.render("Hello World", True, "Black")
 
+# Sound
+# bg_sound = pygame.mixer.Sound("path to sound")
+# bg_sound.play(-1)
+
+
 running = True
 while running:
     

@@ -1,11 +1,12 @@
 import os
+import time
 import pygame
 
-clock = pygame.time.Clock()
+from const import BG_SPEED, PLAYER_SPEED
+
 
 pygame.init()
 screen = pygame.display.set_mode((1366,768))
-screen.fill((70, 44,133))
 pygame.display.set_caption("First_pygame_project")
 icon = pygame.image.load("img\\chess_icon.png")
 pygame.display.set_icon(icon)
@@ -36,10 +37,11 @@ loops = 0
 player_anim_count = 0
 bg_x = 0
 bg_x1 = 1366
-bg_speed = 3
 
-player_speed = 5
 player_x = 150
+player_y = 550
+is_jumped = False
+jump_high = 15
 
 # Sound
 # bg_sound = pygame.mixer.Sound("path to sound")
@@ -56,15 +58,29 @@ while running:
     keys = pygame.key.get_pressed()
     
     if keys[pygame.K_a]:
-        screen.blit(walk_left[player_anim_count],(player_x,550))
+        screen.blit(walk_left[player_anim_count],(player_x,player_y))
     else: 
-        screen.blit(walk_right[player_anim_count],(player_x,550))
+        screen.blit(walk_right[player_anim_count],(player_x, player_y))
     
     if keys[pygame.K_d] and player_x <=1250:
-        player_x += player_speed
+        player_x += PLAYER_SPEED
     elif keys[pygame.K_a] and player_x >= 20:
-        player_x -= player_speed
+        player_x -= PLAYER_SPEED
     
+    if not is_jumped:
+        if keys[pygame.K_SPACE] or keys[pygame.K_w]:
+            is_jumped = True
+    else:
+        if jump_high >= -15:
+            if jump_high > 0:
+                player_y -=(jump_high ** 2)/3
+            else:
+                player_y += (jump_high **2 )/3
+            jump_high -=1.5
+        else:
+            is_jumped = False
+            jump_high = 15
+        
     
     
     if player_anim_count == 3:
@@ -72,8 +88,8 @@ while running:
     elif loops%7 ==0:
         player_anim_count +=1
     
-    bg_x -= bg_speed
-    bg_x1 -= bg_speed
+    bg_x -= BG_SPEED
+    bg_x1 -= BG_SPEED
     
     if bg_x <= -1366:
         bg_x = 0

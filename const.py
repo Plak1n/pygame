@@ -1,0 +1,2 @@
+BG_SPEED = 3
+PLAYER_SPEED = 5
