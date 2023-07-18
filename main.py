@@ -49,12 +49,17 @@ player_y = 550
 is_jumped = False
 jump_high = 11
 
+
+label = pygame.font.Font('fonts\\RedHatMono-Italic-VariableFont_wght.ttf', 40)
+
+gameplay = True
+
 # Sound
 # bg_sound = pygame.mixer.Sound("path to sound")
 # bg_sound.play(-1)
 
 ghost_timer = pygame.USEREVENT + 1
-pygame.time.set_timer(ghost_timer,5000,-1)
+pygame.time.set_timer(ghost_timer,3500,-1)
 
 running = True
 while running:
@@ -62,70 +67,77 @@ while running:
     
     screen.blit(background, (bg_x,0))
     screen.blit(background, (bg_x1,0))
-    screen.blit(ghost,(ghost_x,550))
     
-    player_rect = walk_left[player_anim_count].get_rect(topleft=(player_x, player_y))
-    
-    if ghost_list_in_game:
-        for el in ghost_list_in_game:
-            screen.blit(ghost, el)
-            el.x -=GHOST_SPEED
-            if player_rect.colliderect(el):
-                print("You lose")
-    
-   
-    
-    keys = pygame.key.get_pressed()
-    
-    if keys[pygame.K_a]:
-        if keys[pygame.K_s]:
-            screen.blit(walk_left[player_anim_count], (player_x, player_y + PLAYER_HEIGHT_STANDING - PLAYER_HEIGHT_CROUCHING))
-        else:
-            screen.blit(walk_left[player_anim_count],(player_x,player_y))
-    else: 
-        if keys[pygame.K_s]:
-            screen.blit(walk_right[player_anim_count], (player_x, player_y + PLAYER_HEIGHT_STANDING - PLAYER_HEIGHT_CROUCHING))
-        else:
-            screen.blit(walk_right[player_anim_count],(player_x, player_y))
-
-    
-    if keys[pygame.K_d] and player_x <=1250 and not keys[pygame.K_s]:
-        player_x += PLAYER_SPEED
-    elif keys[pygame.K_a] and player_x >= 20 and not keys[pygame.K_s]:
-        player_x -= PLAYER_SPEED
-
-    
-    if not is_jumped:
-        if keys[pygame.K_SPACE] or keys[pygame.K_w]:
-            is_jumped = True
-    else:
-        if jump_high >= -11:
-            if jump_high > 0:
-                player_y -=(jump_high ** 2)/2
-            else:
-                player_y += (jump_high **2 )/2
-            jump_high -=1
-        else:
-            is_jumped = False
-            jump_high = 11
+    if gameplay:
+      
+        player_rect = walk_left[player_anim_count].get_rect(topleft=(player_x, player_y))
+        
+        if ghost_list_in_game:
+            for (i,el) in  enumerate(ghost_list_in_game):
+                screen.blit(ghost, el)
+                el.x -=GHOST_SPEED
+                
+                if el.x < -10:
+                    ghost_list_in_game.pop(i)
+                
+                if player_rect.colliderect(el):
+                    gameplay = False
         
     
+        
+        keys = pygame.key.get_pressed()
+        
+        if keys[pygame.K_a]:
+            if keys[pygame.K_s]:
+                screen.blit(walk_left[player_anim_count], (player_x, player_y + PLAYER_HEIGHT_STANDING - PLAYER_HEIGHT_CROUCHING))
+            else:
+                screen.blit(walk_left[player_anim_count],(player_x,player_y))
+        else: 
+            if keys[pygame.K_s]:
+                screen.blit(walk_right[player_anim_count], (player_x, player_y + PLAYER_HEIGHT_STANDING - PLAYER_HEIGHT_CROUCHING))
+            else:
+                screen.blit(walk_right[player_anim_count],(player_x, player_y))
+
+        
+        if keys[pygame.K_d] and player_x <=1250 and not keys[pygame.K_s]:
+            player_x += PLAYER_SPEED
+        elif keys[pygame.K_a] and player_x >= 20 and not keys[pygame.K_s]:
+            player_x -= PLAYER_SPEED
+
+        
+        if not is_jumped:
+            if keys[pygame.K_SPACE] or keys[pygame.K_w]:
+                is_jumped = True
+        else:
+            if jump_high >= -11:
+                if jump_high > 0:
+                    player_y -=(jump_high ** 2)/2
+                else:
+                    player_y += (jump_high **2 )/2
+                jump_high -=1
+            else:
+                is_jumped = False
+                jump_high = 11
+            
+        
+        
+        if player_anim_count == 3:
+            player_anim_count = 0 
+        elif loops%8 ==0:
+            player_anim_count +=1
+        
+        bg_x -= BG_SPEED
+        bg_x1 -= BG_SPEED
+        
+        if bg_x <= -1366:
+            bg_x = 0
+        if bg_x1 <= 0:
+            bg_x1 = 1366
+        
+        ghost_x -=GHOST_SPEED
     
-    if player_anim_count == 3:
-        player_anim_count = 0 
-    elif loops%8 ==0:
-        player_anim_count +=1
-    
-    bg_x -= BG_SPEED
-    bg_x1 -= BG_SPEED
-    
-    if bg_x <= -1366:
-        bg_x = 0
-    if bg_x1 <= 0:
-        bg_x1 = 1366
-    
-    ghost_x -=GHOST_SPEED
-    
+    else:
+        screen.fill((87,88,89)) 
     pygame.display.update()
     
     for event in pygame.event.get():
